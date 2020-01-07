@@ -26,10 +26,9 @@ public class Client {
         this.printStream.println(":: Chat initialisation");
         this.user.setUsername(this.clientService.askUsername());
         Session session = this.clientService.connect(this.user.getUsername());
-        if(session != null && session.isOpen())
+        if (session != null && session.isOpen())
             this.clientService.startChatting(session, this.user.getUsername());
         else
             this.printStream.println("\nConnection error !");
-
     }
 }

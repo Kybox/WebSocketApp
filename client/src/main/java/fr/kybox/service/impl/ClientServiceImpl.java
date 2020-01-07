@@ -36,7 +36,7 @@ public class ClientServiceImpl implements ClientService {
                 Runtime.getRuntime().exec("clear");
         } catch (Exception e) {
             for (int i = 0; i < 100; i++)
-                this.printStream.println("");
+                this.printStream.println();
         }
     }
 
@@ -55,17 +55,15 @@ public class ClientServiceImpl implements ClientService {
         try {
             session = clientManager.asyncConnectToServer(
                     Endpoint.class,
-                    new URI("ws://localhost:8888/chat/" + username));
+                    new URI("ws://localhost:8080/chat/" + username));
 
             this.loading(session);
             session.get().getUserProperties().put("user", username);
             return session.get();
 
         } catch (Exception e) {
-            e.printStackTrace();
             this.printStream.println("\n");
             this.printStream.println(format("Error : %s", e.getMessage()));
-            e.printStackTrace();
             return null;
         }
     }
