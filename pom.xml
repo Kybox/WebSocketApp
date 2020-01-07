@@ -17,6 +17,7 @@
         <lombok.version>1.18.10</lombok.version>
         <maven.assembly.version>3.2.0</maven.assembly.version>
         <maven.compiler.version>3.8.1</maven.compiler.version>
+        <spring-context.version>5.2.2.RELEASE</spring-context.version>
         <tyrus-container-grizzly.version>1.15</tyrus-container-grizzly.version>
     </properties>
 
@@ -37,6 +38,11 @@
                 <groupId>org.glassfish.tyrus</groupId>
                 <artifactId>tyrus-container-grizzly-server</artifactId>
                 <version>${tyrus-container-grizzly.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context</artifactId>
+                <version>${spring-context.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -1,27 +1,27 @@
 package fr.kybox;
 
-import fr.kybox.endpoint.Endpoint;
-import org.glassfish.tyrus.server.Server;
+import fr.kybox.server.Server;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
 
-import javax.websocket.DeploymentException;
-import java.io.PrintStream;
-import java.util.Scanner;
-
+@ComponentScan
 public class ServerApplication {
 
-    public final static String PATH_PARAM = "user";
+    private final Server server;
+
+    public ServerApplication(Server server) {
+        this.server = server;
+    }
 
     public static void main(String[] args) {
-        PrintStream writer = new PrintStream(System.out);
-        Server server = new Server("localhost", 8080, "/", null, Endpoint.class);
-        try {
-            server.start();
-            writer.println("Press any key to stop the server..");
-            new Scanner(System.in).nextLine();
-        } catch (DeploymentException e) {
-            e.printStackTrace();
-        } finally {
-            server.stop();
-        }
+
+        ApplicationContext applicationContext = new AnnotationConfigApplicationContext(ServerApplication.class);
+        ServerApplication serverApplication = applicationContext.getBean(ServerApplication.class);
+        serverApplication.startApplication();
+    }
+
+    private void startApplication() {
+        this.server.start();
     }
 }
