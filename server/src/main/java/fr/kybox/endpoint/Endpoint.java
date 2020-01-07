@@ -18,48 +18,39 @@ public class Endpoint {
 
     @OnOpen
     public void onOpen(@PathParam("user") String user, Session session) {
-        this.printStream.println(format("%s join the chat room", user));
-        session.getOpenSessions().forEach(s -> {
-            if (!s.getId().equals(session.getId())) {
-                try {
-                    s.getAsyncRemote().sendText("Server > " + format("%s join the chat room", user));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        this.sendMessage(session, "join the chat room.", user, true);
     }
 
     @OnMessage
     public void onMessage(@PathParam("user") String user, String message, Session session) {
-        this.printStream.println(format("%s > %s", user, message));
-        session.getOpenSessions().forEach(s -> {
-            if (!s.getId().equals(session.getId())) {
-                try {
-                    s.getAsyncRemote().sendText(user + " > " + message);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        this.sendMessage(session, message, user, false);
     }
 
     @OnClose
     public void onClose(@PathParam("user") String user, Session session) {
-        this.printStream.println(format("%s left the chat room.", user));
-        session.getOpenSessions().forEach(s -> {
-            if (!s.getId().equals(session.getId())) {
-                try {
-                    s.getAsyncRemote().sendText("Server > " + format("%s left the chat room.", user));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        this.sendMessage(session, "left the chat room.", user, true);
     }
 
     @OnError
     public void onError(Throwable throwable) {
         this.printStream.println("SERVER ERROR : " + throwable.toString());
+    }
+
+    private void sendMessage(Session session, String message, String user, boolean fromServer){
+        if(fromServer) this.printStream.println(format("%s %s", user, message));
+        else this.printStream.println(format("%s > %s", user, message));
+        session.getOpenSessions().forEach(s -> {
+            if (!s.getId().equals(session.getId())) {
+                try {
+                    if(fromServer) {
+                        s.getAsyncRemote().sendText(format("Server > %s %s", user, message));
+                    } else {
+                        s.getAsyncRemote().sendText(format("%s > %s", user, message));
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 }
