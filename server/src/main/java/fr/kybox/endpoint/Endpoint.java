@@ -1,28 +1,25 @@
 package fr.kybox.endpoint;
 
+import org.glassfish.tyrus.core.MaxSessions;
+
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
-import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static java.lang.String.format;
 
+@MaxSessions(10)
 @ServerEndpoint(value = "/chat/{user}")
 public class Endpoint {
-
-    static Map<String, Session> userList = new ConcurrentHashMap<>();
 
     // Injection failed
     private PrintStream printStream = new PrintStream(System.out);
 
     @OnOpen
     public void onOpen(@PathParam("user") String user, Session session) {
-        userList.put(user, session);
         this.printStream.println(format("%s join the chat room", user));
-        userList.values().forEach(s -> {
+        session.getOpenSessions().forEach(s -> {
             if (!s.getId().equals(session.getId())) {
                 try {
                     s.getAsyncRemote().sendText("Server > " + format("%s join the chat room", user));
@@ -35,8 +32,8 @@ public class Endpoint {
 
     @OnMessage
     public void onMessage(@PathParam("user") String user, String message, Session session) {
-        this.printStream.println(format("%s1 > %s2", user, message));
-        userList.values().forEach(s -> {
+        this.printStream.println(format("%s > %s", user, message));
+        session.getOpenSessions().forEach(s -> {
             if (!s.getId().equals(session.getId())) {
                 try {
                     s.getAsyncRemote().sendText(user + " > " + message);
@@ -48,14 +45,15 @@ public class Endpoint {
     }
 
     @OnClose
-    public void onClose(@PathParam("user") String user) {
-        userList.remove(user);
+    public void onClose(@PathParam("user") String user, Session session) {
         this.printStream.println(format("%s left the chat room.", user));
-        userList.values().forEach(s -> {
-            try {
-                s.getBasicRemote().sendText("Server > " + format("%s left the chat room.", user));
-            } catch (IOException e) {
-                e.printStackTrace();
+        session.getOpenSessions().forEach(s -> {
+            if (!s.getId().equals(session.getId())) {
+                try {
+                    s.getAsyncRemote().sendText("Server > " + format("%s left the chat room.", user));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
