@@ -10,6 +10,10 @@ public class ClientApplication {
 
     private final Client client;
 
+    static {
+        System.setProperty("java.util.logging.SimpleFormatter.format", "%5$s");
+    }
+
     public ClientApplication(Client client) {
         this.client = client;
     }

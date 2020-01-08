@@ -1,32 +1,35 @@
 package fr.kybox.endpoint;
 
+import lombok.extern.java.Log;
+
 import javax.websocket.*;
-import java.io.PrintStream;
 import java.util.Arrays;
 
+import static java.lang.String.format;
+
+@Log
 @ClientEndpoint
 public class Endpoint {
 
-    private PrintStream printStream = new PrintStream(System.out);
-
     @OnOpen
     public void onOpen() {
-        this.printStream.println(".. [OK]");
+        log.info("\r:: Connected, you can chat now.\n");
+        log.info(":: Type 'quit' to disconnect.\n");
     }
 
     @OnMessage
     public void onMessage(String message, Session session) {
-        this.printStream.println("\r" + message);
-        this.printStream.print(session.getUserProperties().get("user") + " > ");
+        log.info(format("\r%s %n", message));
+        log.info(session.getUserProperties().get("user") + " > ");
     }
 
     @OnClose
     public void onClose() {
-        this.printStream.println("Connection closed");
+        log.info(format("Connection closed%n"));
     }
 
     @OnError
     public void onError(Throwable t) {
-        this.printStream.println("ERROR : " + Arrays.toString(t.getStackTrace()));
+        log.info("ERROR : " + Arrays.toString(t.getStackTrace()));
     }
 }

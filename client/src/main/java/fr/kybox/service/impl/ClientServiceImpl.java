@@ -2,28 +2,27 @@ package fr.kybox.service.impl;
 
 import fr.kybox.endpoint.Endpoint;
 import fr.kybox.service.ClientService;
+import lombok.extern.java.Log;
 import org.glassfish.tyrus.client.ClientManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.websocket.Session;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.URI;
 import java.util.Scanner;
 import java.util.concurrent.Future;
 
 import static java.lang.String.format;
 
+@Log
 @Service
 public class ClientServiceImpl implements ClientService {
 
-    private final PrintStream printStream;
     private final Scanner scanner;
 
     @Autowired
-    public ClientServiceImpl(PrintStream printStream, Scanner scanner) {
-        this.printStream = printStream;
+    public ClientServiceImpl(Scanner scanner) {
         this.scanner = scanner;
     }
 
@@ -36,19 +35,19 @@ public class ClientServiceImpl implements ClientService {
                 Runtime.getRuntime().exec("clear");
         } catch (Exception e) {
             for (int i = 0; i < 100; i++)
-                this.printStream.println();
+                log.info(format("%n"));
         }
     }
 
     @Override
     public String askUsername() {
-        this.printStream.println(":: Entrer your name :");
+        log.info(format(":: Enter your name :%n"));
         return this.scanner.nextLine();
     }
 
     @Override
     public Session connect(String username) {
-        this.printStream.println(format(":: Hi %s, please wait.", username));
+        log.info(format(":: Hi %s, please wait.%n", username));
         Future<Session> session;
         ClientManager clientManager = ClientManager.createClient();
         clientManager.setAsyncSendTimeout(10000);
@@ -62,33 +61,31 @@ public class ClientServiceImpl implements ClientService {
             return session.get();
 
         } catch (Exception e) {
-            this.printStream.println("\n");
-            this.printStream.println(format("Error : %s", e.getMessage()));
+            log.info("\n");
+            log.info(format("Error : %s", e.getMessage()));
             return null;
         }
     }
 
     @Override
     public void startChatting(Session session, String username) {
-        this.printStream.println("\r:: Connected, you can chat now.");
-        this.printStream.println(":: Type 'quit' to disconnect.");
         String prompt = format("%s > ", username);
         String msg;
         do {
-            this.printStream.print(prompt);
+            log.info("\r" + prompt);
             msg = this.scanner.nextLine();
             try {
                 session.getAsyncRemote().sendText(msg);
             } catch (Exception e) {
                 e.printStackTrace();
-                this.printStream.println(format("Error : %s", e.getMessage()));
+                log.info(format("Error : %s", e.getMessage()));
                 e.printStackTrace();
                 msg = "quit";
             }
         } while (!msg.equalsIgnoreCase("quit"));
         try {
             session.close();
-            this.printStream.println("Session closed");
+            log.info("Session closed");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -98,12 +95,13 @@ public class ClientServiceImpl implements ClientService {
         boolean loading = true;
         while (loading) {
             try {
-                printStream.print("\r[.  ] Server connection attempt.");
+                log.info("\r[.  ] Server connection attempt.");
                 Thread.sleep(300);
-                printStream.print("\r[ . ] Server connection attempt.");
+                log.info("\r[ . ] Server connection attempt.");
                 Thread.sleep(300);
-                printStream.print("\r[  .] Server connection attempt.");
+                log.info("\r[  .] Server connection attempt.");
                 Thread.sleep(300);
+                log.info("\r");
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 Thread.currentThread().interrupt();
