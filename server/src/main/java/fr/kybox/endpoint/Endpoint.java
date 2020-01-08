@@ -1,20 +1,18 @@
 package fr.kybox.endpoint;
 
+import lombok.extern.java.Log;
 import org.glassfish.tyrus.core.MaxSessions;
 
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
-import java.io.PrintStream;
 
 import static java.lang.String.format;
 
+@Log
 @MaxSessions(10)
 @ServerEndpoint(value = "/chat/{user}")
 public class Endpoint {
-
-    // Injection failed
-    private PrintStream printStream = new PrintStream(System.out);
 
     @OnOpen
     public void onOpen(@PathParam("user") String user, Session session) {
@@ -33,20 +31,18 @@ public class Endpoint {
 
     @OnError
     public void onError(Throwable throwable) {
-        this.printStream.println("SERVER ERROR : " + throwable.toString());
+        log.info("SERVER ERROR : " + throwable.getMessage());
     }
 
-    private void sendMessage(Session session, String message, String user, boolean fromServer){
-        if(fromServer) this.printStream.println(format("%s %s", user, message));
-        else this.printStream.println(format("%s > %s", user, message));
+    private void sendMessage(Session session, String message, String user, boolean fromServer) {
+        if (fromServer) log.info(user + " " + message);
+        else log.info(user + " > " + message);
         session.getOpenSessions().forEach(s -> {
             if (!s.getId().equals(session.getId())) {
                 try {
-                    if(fromServer) {
-                        s.getAsyncRemote().sendText(format("Server > %s %s", user, message));
-                    } else {
-                        s.getAsyncRemote().sendText(format("%s > %s", user, message));
-                    }
+                    if (fromServer) s.getAsyncRemote().sendText(format("Server > %s %s", user, message));
+                    else s.getAsyncRemote().sendText(format("%s > %s", user, message));
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
