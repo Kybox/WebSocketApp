@@ -35,8 +35,8 @@ public class Endpoint {
     }
 
     private void sendMessage(Session session, String message, String user, boolean fromServer) {
-        if (fromServer) log.info(user + " " + message);
-        else log.info(user + " > " + message);
+        if (fromServer) log.info(format("%s %s", user, message));
+        else log.info(format("%s > %s", user, message));
         session.getOpenSessions().forEach(s -> {
             if (!s.getId().equals(session.getId())) {
                 try {

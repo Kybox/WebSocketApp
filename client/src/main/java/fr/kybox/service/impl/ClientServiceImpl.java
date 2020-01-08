@@ -72,7 +72,7 @@ public class ClientServiceImpl implements ClientService {
         String prompt = format("%s > ", username);
         String msg;
         do {
-            log.info("\r" + prompt);
+            log.info(format("\r%s", prompt));
             msg = this.scanner.nextLine();
             try {
                 session.getAsyncRemote().sendText(msg);
@@ -95,11 +95,13 @@ public class ClientServiceImpl implements ClientService {
         boolean loading = true;
         while (loading) {
             try {
-                log.info("\r[.  ] Server connection attempt.");
+                log.info("\r[.  ] Connection attempt");
                 Thread.sleep(300);
-                log.info("\r[ . ] Server connection attempt.");
+                log.info("\r[ . ] Connection attempt");
                 Thread.sleep(300);
-                log.info("\r[  .] Server connection attempt.");
+                log.info("\r[  .] Connection attempt");
+                Thread.sleep(300);
+                log.info("\r[ . ] Connection attempt");
                 Thread.sleep(300);
                 log.info("\r");
             } catch (InterruptedException e) {
